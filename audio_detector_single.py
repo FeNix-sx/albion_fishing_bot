@@ -5,7 +5,6 @@ from scipy import signal
 import queue
 import threading
 import time
-import random
 import pyautogui
 import json
 
@@ -56,7 +55,7 @@ class AudioDetectorEnhanced:
         self.initialized = False
 
         # Выводим инструкции один раз при создании объекта
-        self._print_instructions()
+        # self._print_instructions()
 
     def _print_instructions(self):
         """Выводим справочную информацию один раз"""
@@ -96,14 +95,15 @@ class AudioDetectorEnhanced:
         volume_indicator = self.get_volume_indicator(volume_norm)
         detection_indicator = self.get_detection_indicator(self.last_detection_score)
 
-        print(f"\rЗвук: {volume_indicator} | "
-              f"Сигнал: {detection_indicator} | "
-              f"Громкость: {volume_norm:.2f} | "
-              f"Схожесть: {self.last_detection_score:.3f} | "
-              f"Макс: {self.max_detection_score:.3f}", end='')
+        # print(f"\rЗвук: {volume_indicator} | "
+        #       f"Сигнал: {detection_indicator} | "
+        #       f"Громкость: {volume_norm:.2f} | "
+        #       f"Схожесть: {self.last_detection_score:.3f} | "
+        #       f"Макс: {self.max_detection_score:.3f}", end='')
 
         if has_sound:
-            audio_data = indata[:, 0] if len(indata.shape) > 1 else indata
+            # audio_data = indata[:, 0] if len(indata.shape) > 1 else indata  # Берётся только левый канал
+            audio_data = np.mean(indata, axis=1) if len(indata.shape) > 1 else indata  # Среднее между L и R
             self.audio_queue.put(audio_data)
 
     def detect_template_sound(self, audio_data):
@@ -160,8 +160,8 @@ class AudioDetectorEnhanced:
                     )
                     self.template_sample_rate = self.sample_rate
 
-                print(f"\nИнициализация устройства: {device_info['name']}")
-                print(f"Частота дискретизации: {self.sample_rate} Hz")
+                # print(f"\nИнициализация устройства: {device_info['name']}")
+                # print(f"Частота дискретизации: {self.sample_rate} Hz")
                 self.initialized = True
             return True
 

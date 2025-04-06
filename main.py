@@ -1,78 +1,95 @@
-import numpy as np
-from random import uniform, randint
-from mss.windows import MSS as mss
-from PIL import Image
 import time
-import pyautogui as pg
-import cv2
-
-template = cv2.imread("float_small.jpg", cv2.IMREAD_GRAYSCALE)
-w, h = template.shape[::-1]
-print(w, h)
-left = 2560
-height = 1440
-monitor = {"top": 700, "left": 1100, "width": 350, "height": 100}
-
-
-def get_monitor(monitor: dict):
-    with mss() as sct:
-        img = np.array(sct.grab(monitor))
-        return img
+from collections import defaultdict
+from audio_detector_single import AudioDetectorEnhanced
+from fishing_bot import FishingBot
+from auto_mouse_click import AutoMouseClick
+from screen_divider import ScreenDivider
+from item_recognizer import ItemRecognizer
+import pyautogui
+import os
 
 
-def get_time_difference(time_list):
-    time_list.append(time.time())
-    if len(time_list) > 1:
-        time_difference = time_list[-1] - time_list[-2]
-        return time_difference
-    else:
-        return 0
+class FishingManager:
+    def __init__(self):
+        self.catch_stats = defaultdict(int)
+        self.recognizer = ItemRecognizer()
+
+    def print_header(self, target):
+        print(f"\n🎯 Цель: поймать {target} рыб")
+        print("❌ Для выхода нажмите Ctrl+C")
+        print("-" * 50)
+
+    def countdown(self):
+        print("\n⏳ Подготовка ...")
+        for i in range(3, 0, -1):
+            print(f"Начало через {i}...")
+            time.sleep(1)
+        print("\n🎣 Начинаем ловлю!")
+
+    def process_catch(self, total, target):
+        time.sleep(1.2)
+        screenshot = "temp_catch.png"
+        pyautogui.screenshot(screenshot)
+
+        item_name, count, _ = self.recognizer.process_image(screenshot)
+        if item_name:
+            self.catch_stats[item_name] += count
+            print(f"🎉 Рыба поймана! Всего: {total}/{target}")
+            print(f"🐟 Поймано: {item_name} ({count} шт)")
+        else:
+            print("🎉 Рыба поймана! (не удалось распознать)")
+
+        try:
+            os.remove(screenshot)
+        except:
+            pass
+
+    def print_summary(self):
+        print("\n" + "-" * 50)
+        print("Всего поймано:")
+        for item, count in self.catch_stats.items():
+            print(f"{item.ljust(25)} {'-' * (10 - len(str(count)))} {count} шт")
+        print("\n🎊 Достигнута цель! Завершение работы...")
 
 
 def main():
-    time_list = []
-    x = 0
-    btn_click = False
+    print("\n🎮 Запуск автоматической рыбалки")
+    target = int(input("\n🎯 Сколько рыб нужно поймать? "))
 
-    while True:
-        last_time = time.time()
-        img = get_monitor(monitor)
-        # cv2.imshow("OpenCV/Numpy normal", img)
-        print("\rfps: {}".format(1 / (time.time() - last_time)), x, end="")
-        gray_frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        res = cv2.matchTemplate(gray_frame, template, cv2.TM_CCOEFF_NORMED)
-        loc = np.where(res >= 0.7)
+    manager = FishingManager()
+    divider = ScreenDivider().setup()
+    mouse_click = AutoMouseClick(min_hold_time=0.4, max_hold_time=1.1)
+    detector = AudioDetectorEnhanced("template_mono.json")
 
-        if np.size(loc) == 0 and btn_click == True:
-            pg.mouseUp(button='left')
-            print("\n Поймал")
-            btn_click = False
+    manager.print_header(target)
+    manager.countdown()
 
-        for pt in zip(*loc[::-1]):
-            cv2.rectangle(img, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 3)
-            x = pt[0]
-            time_list.append(time.time())
-            print("\nx = " , x)
+    total = 0
+    while total < target:
+        try:
+            divider.move_to_random_area()
+            mouse_click.run()
+            detector.run()
 
-            if x < randint(190, 215):
-                # print("\rGGGGGGGGGGG!", end="")
-                pg.mouseDown(button="left")
-            elif x > randint(220, 235):
-                # print("\r===========!", end="")
-                pg.mouseUp(button='left')
+            bot = FishingBot("float_small.jpg")
+            bot.run()
 
-            btn_click = True
-            time.sleep(uniform(0.02, 0.05))
+            if bot.catches > 0:
+                total += 1
+                manager.process_catch(total, target)
+
+            if total < target:
+                time.sleep(3)
+
+        except KeyboardInterrupt:
+            print("\n👋 Программа остановлена пользователем")
             break
 
-        # cv2.imshow("Frame", img)
-
-        key = cv2.waitKey(1)
-
-        if cv2.waitKey(25) & 0xFF == ord("q"):
-            cv2.destroyAllWindows()
-            break
+    manager.print_summary()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n👋 Программа остановлена пользователем")

@@ -67,10 +67,10 @@ class FishingBot:
         self.base_press_range = (190, 215)
         self.base_release_range = (220, 235)
 
-        print("\n🎣 Инициализация бота для рыбалки")
-        print(f"📺 Разрешение экрана: {self.screen_resolution.width}x{self.screen_resolution.height}")
-        print(f"🔍 Область поиска: {self.monitor_config.__dict__}")
-        print("-" * 50)
+        # print("\n🎣 Инициализация бота для рыбалки")
+        # print(f"📺 Разрешение экрана: {self.screen_resolution.width}x{self.screen_resolution.height}")
+        # print(f"🔍 Область поиска: {self.monitor_config.__dict__}")
+        # print("-" * 50)
 
     def get_screen(self) -> np.ndarray:
         """Получение скриншота указанной области экрана"""
@@ -148,12 +148,12 @@ class FishingBot:
 
                 # Выводим только FPS и позицию поплавка
                 fps = 1 / (time.time() - start_time)
-                position_indicator = "🎯" if position is not None else "❌"
-                bite_status = "🎣 КЛЮЁТ!!!" if self.btn_click else ""
+                # position_indicator = "🎯" if position is not None else "❌"
+                # bite_status = "🎣 КЛЮЁТ!!!" if self.btn_click else ""
 
-                print(f"\rFPS: {fps:.2f} | "
-                      f"Позиция: {position_indicator} {position if position is not None else 'не найдена'} | "
-                      f"{bite_status}", end="")
+                # print(f"\rFPS: {fps:.2f} | "
+                #       f"Позиция: {position_indicator} {position if position is not None else 'не найдена'} | "
+                #       f"{bite_status}", end="")
 
                 # Обрабатываем позицию поплавка или его исчезновение
                 if position is not None:
@@ -162,7 +162,7 @@ class FishingBot:
                     self.handle_float_disappearance()
                     # Проверяем таймаут поплавка
                     if self.check_float_timeout():
-                        print("\n\n⏳ Поплавок не обнаружен более 3 секунд. Завершение работы...")
+                        # print("\n\n⏳ Поплавок не обнаружен более 3 секунд. Завершение работы...")
                         break
                     # Если рыба поймана, завершаем работу
                     if self.catches > 0:
