@@ -177,6 +177,9 @@ class FishingBot:
             cv2.destroyAllWindows()
             self.screen_capture.close()
 
+    def stop(self):
+        """Просто устанавливает флаг для остановки (если у вас есть цикл while)."""
+        self._running = False  # Предполагая, что у вас есть такой флаг
 
 def main():
     # Создаем и запускаем бота
