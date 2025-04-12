@@ -1,0 +1,18 @@
+{
+  "images": {
+    "fishing_button": "img/fishing.png",
+    "bite_indicator": "img/bite.png"
+  },
+  "delays": {
+    "click_delay": 0.5,
+    "bite_check_interval": 1.0
+  },
+  "hotkeys": {
+    "start_bot": "F1",
+    "stop_bot": "F2"
+  },
+  "debug": {
+    "enable_logs": true,
+    "save_screenshots": true
+  }
+}

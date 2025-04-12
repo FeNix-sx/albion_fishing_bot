@@ -71,7 +71,7 @@ def main():
             detector.run()
 
             print("\n🎯 Сигнал обнаружен! Ловлю...")
-            bot = FishingBot("float_small.jpg")
+            bot = FishingBot("img/float_small.jpg")
             bot.run()
 
             # Обработка результата
