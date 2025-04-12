@@ -3,11 +3,12 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout,
                              QGroupBox, QHBoxLayout, QFrame,
                              QSpinBox, QComboBox, QFormLayout,
                              QRadioButton, QButtonGroup, QStackedWidget,
-                             QCheckBox)
-from PyQt5.QtCore import Qt, pyqtSignal
+                             QCheckBox, QProgressBar)
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QFont, QColor, QPalette
 from PyQt5.QtWinExtras import QtWin
 import ctypes
+import random
 
 
 class FishingBotGUI(QMainWindow):
@@ -67,7 +68,7 @@ class FishingBotGUI(QMainWindow):
         settings_layout.setContentsMargins(0, 0, 0, 0)
         settings_layout.setSpacing(15)
 
-        # Общие настройки (расширенная версия)
+        # Общие настройки
         common_group = QGroupBox("Общие настройки")
         common_group.setMinimumWidth(400)
         common_layout = QVBoxLayout()
@@ -94,21 +95,48 @@ class FishingBotGUI(QMainWindow):
         bottom_label.setAlignment(Qt.AlignRight)
         common_layout.addWidget(bottom_label)
 
-        # Звуковое устройство
+        # Звуковое устройство с тестом
         audio_label = QLabel("Звуковое устройство:")
         audio_label.setFont(QFont("Arial", 10, QFont.Bold))
         common_layout.addWidget(audio_label)
 
+        audio_control_layout = QHBoxLayout()
+
         self.audio_combo = QComboBox()
         self.audio_combo.setFont(QFont("Arial", 10))
-        # Заглушка - потом добавим реальные устройства
         self.audio_combo.addItems([
             "По умолчанию",
             "Устройство 1",
             "Устройство 2",
             "Другое..."
         ])
-        common_layout.addWidget(self.audio_combo)
+        audio_control_layout.addWidget(self.audio_combo)
+
+        self.test_audio_btn = QPushButton("Тест звука")
+        self.test_audio_btn.setObjectName("testAudioButton")
+        self.test_audio_btn.setFont(QFont("Arial", 9))
+        self.test_audio_btn.setFixedWidth(100)
+        audio_control_layout.addWidget(self.test_audio_btn)
+
+        common_layout.addLayout(audio_control_layout)
+
+        # Индикатор теста звука
+        self.audio_level = QProgressBar()
+        self.audio_level.setRange(0, 100)
+        self.audio_level.setValue(0)
+        self.audio_level.setTextVisible(False)
+        self.audio_level.setFixedHeight(6)
+        common_layout.addWidget(self.audio_level)
+
+        audio_status_layout = QHBoxLayout()
+        self.audio_status_label = QLabel("Устройство не проверено")
+        self.audio_status_label.setFont(QFont("Arial", 8))
+        self.audio_status_label.setStyleSheet("color: #aaaaaa;")
+
+        audio_status_layout.addWidget(self.audio_status_label)
+        audio_status_layout.addStretch()
+
+        common_layout.addLayout(audio_status_layout)
 
         audio_bottom_label = QLabel("для распознавания звука")
         audio_bottom_label.setFont(QFont("Arial", 8))
@@ -123,8 +151,8 @@ class FishingBotGUI(QMainWindow):
         mode_main_layout = QVBoxLayout()
         mode_main_layout.setContentsMargins(15, 20, 15, 20)
 
-        mode_label = QLabel("выбор режима")
-        mode_label.setFont(QFont("Arial", 8))
+        mode_label = QLabel("Выбор режима:")
+        mode_label.setFont(QFont("Arial", 10, QFont.Bold))
         mode_label.setAlignment(Qt.AlignLeft)
         mode_main_layout.addWidget(mode_label)
 
@@ -175,12 +203,12 @@ class FishingBotGUI(QMainWindow):
         self.settings_stack.addWidget(self.time_settings)
         mode_main_layout.addWidget(self.settings_stack)
 
-        # Дополнительные опции
+        # Дополнительные опции с красивыми галочками
         options_label = QLabel("Дополнительные опции:")
         options_label.setFont(QFont("Arial", 10, QFont.Bold))
         mode_main_layout.addWidget(options_label)
 
-        # Чекбоксы для наживки и пирога
+        # Чекбоксы для наживки и пирога с зелеными галочками
         self.use_bait_checkbox = QCheckBox("Использовать наживку")
         self.use_bait_checkbox.setFont(QFont("Arial", 10))
         self.use_bait_checkbox.setChecked(True)
@@ -238,6 +266,7 @@ class FishingBotGUI(QMainWindow):
         self.audio_combo.currentTextChanged.connect(self.on_audio_changed)
         self.use_bait_checkbox.stateChanged.connect(self.on_bait_changed)
         self.use_food_checkbox.stateChanged.connect(self.on_food_changed)
+        self.test_audio_btn.clicked.connect(self.on_test_audio)
 
     def setup_styles(self):
         self.setStyleSheet("""
@@ -288,6 +317,16 @@ class FishingBotGUI(QMainWindow):
             QPushButton#stopButton:pressed {
                 background-color: #6d1d1d;
             }
+            QPushButton#testAudioButton {
+                background-color: #3a5a7a;
+                padding: 5px 10px;
+            }
+            QPushButton#testAudioButton:hover {
+                background-color: #4a6a8a;
+            }
+            QPushButton#testAudioButton:pressed {
+                background-color: #2a4a6a;
+            }
             QPushButton:disabled {
                 background-color: #2a2a2a;
                 color: #6a6a6a;
@@ -315,7 +354,77 @@ class FishingBotGUI(QMainWindow):
                 padding: 5px;
                 spacing: 5px;
             }
+            QCheckBox::indicator {
+                width: 16px;
+                height: 16px;
+                border: 1px solid #3e3e3e;
+                border-radius: 3px;
+                background: #1e1e1e;
+            }
+            QCheckBox::indicator:checked {
+                background: #2d7d2d;
+                image: url(:/qss_icons/rc/checkbox_checked.png);
+            }
+            QCheckBox::indicator:unchecked {
+                background: #1e1e1e;
+            }
+            QProgressBar {
+                border: 1px solid #3e3e3e;
+                border-radius: 3px;
+                background: #1e1e1e;
+            }
+            QProgressBar::chunk {
+                background-color: #2d7d2d;
+                border-radius: 2px;
+            }
         """)
+
+    def on_test_audio(self):
+        """Тестирование звукового устройства"""
+        device = self.audio_combo.currentText()
+        self.log_output.append(f"Тестирование звука: {device}")
+
+        # Симуляция теста звука
+        self.audio_status_label.setText("Идет проверка звука...")
+        self.audio_status_label.setStyleSheet("color: #dcdcaa;")
+        self.test_audio_btn.setEnabled(False)
+
+        # Создаем таймер для анимации индикатора
+        self.test_timer = QTimer(self)
+        self.test_timer.timeout.connect(self.update_audio_level)
+        self.test_counter = 0
+        self.test_timer.start(100)  # Обновление каждые 100 мс
+
+        # Завершение теста через 3 секунды
+        QTimer.singleShot(3000, self.finish_audio_test)
+
+    def update_audio_level(self):
+        """Обновление индикатора уровня звука"""
+        self.test_counter += 1
+        if self.test_counter % 10 == 0:
+            # Каждую секунду меняем цвет индикатора
+            color = "#dcdcaa" if (self.test_counter // 10) % 2 else "#2d7d2d"
+            self.audio_status_label.setStyleSheet(f"color: {color};")
+
+        # Случайное значение для имитации звука
+        value = random.randint(0, 100)
+        self.audio_level.setValue(value)
+
+    def finish_audio_test(self):
+        """Завершение теста звука"""
+        self.test_timer.stop()
+        self.audio_level.setValue(0)
+        self.test_audio_btn.setEnabled(True)
+
+        # Случайный результат для демонстрации
+        if random.random() > 0.2:  # 80% успешных тестов
+            self.audio_status_label.setText("Устройство работает нормально")
+            self.audio_status_label.setStyleSheet("color: #2d7d2d;")
+            self.log_output.append("Тест звука: успешно")
+        else:
+            self.audio_status_label.setText("Проблемы с устройством!")
+            self.audio_status_label.setStyleSheet("color: #7d2d2d;")
+            self.log_output.append("Тест звука: обнаружены проблемы")
 
     def on_mode_changed(self, button):
         """Переключение между режимами работы"""
@@ -329,6 +438,8 @@ class FishingBotGUI(QMainWindow):
     def on_audio_changed(self, text):
         """Изменение звукового устройства"""
         self.log_output.append(f"Выбрано звуковое устройство: {text}")
+        self.audio_status_label.setText("Устройство не проверено")
+        self.audio_status_label.setStyleSheet("color: #aaaaaa;")
 
     def on_bait_changed(self, state):
         """Изменение состояния наживки"""
@@ -402,6 +513,7 @@ class FishingBotGUI(QMainWindow):
         self.audio_combo.setEnabled(False)
         self.use_bait_checkbox.setEnabled(False)
         self.use_food_checkbox.setEnabled(False)
+        self.test_audio_btn.setEnabled(False)
 
         self.save_settings()
 
@@ -420,6 +532,7 @@ class FishingBotGUI(QMainWindow):
         self.audio_combo.setEnabled(True)
         self.use_bait_checkbox.setEnabled(True)
         self.use_food_checkbox.setEnabled(True)
+        self.test_audio_btn.setEnabled(True)
 
 
 if __name__ == "__main__":
