@@ -1,3 +1,14 @@
+"""
+Главный скрипт бота для рыбалки в Albion Online.
+Координирует работу всех модулей:
+1. Управление мышью (AutoMouseClick)
+2. Разделение экрана (ScreenDivider)
+3. Детектирование поклевки (AudioDetectorEnhanced)
+4. Распознавание улова (ItemRecognizer)
+5. Основная логика рыбалки (FishingBot)
+Запускает интерфейс для задания цели по количеству рыб.
+"""
+
 import time
 from collections import defaultdict
 from audio_detector_single import AudioDetectorEnhanced
