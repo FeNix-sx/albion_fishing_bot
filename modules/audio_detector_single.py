@@ -248,7 +248,7 @@ class AudioDetectorEnhanced:
 
         try:
             while self.running:
-                time.sleep(0.08)
+                time.sleep(0.05)
                 if self.last_detection_score > 0.6:
                     print(f"\n🎣 КЛЮЁТ!!!")
                     self.stop()
@@ -269,5 +269,5 @@ class AudioDetectorEnhanced:
 if __name__ == "__main__":
     # Пример использования (можно тестировать прямо из файла)
     print("Запуск тестового режима...")
-    detector = AudioDetectorEnhanced("template_mono.json")
+    detector = AudioDetectorEnhanced("../template_mono.json")
     detector.run()

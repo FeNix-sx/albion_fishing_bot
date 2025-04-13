@@ -14,9 +14,10 @@ from PIL import Image, ImageTk, ImageGrab, ImageDraw, ImageFont
 
 
 class ScreenDivider:
-    def __init__(self, rows=7, cols=8):
+    def __init__(self, rows=7, cols=8, distance_coef=1.2):
         self.rows = rows
         self.cols = cols
+        self.distance_coef = distance_coef  # Коэффициент для расчета задержки
         self.centers = {}
         self.scan_areas = []
         self.selected_areas = set()
@@ -27,36 +28,53 @@ class ScreenDivider:
         self.window_closed = False
         self.screen_center = (self.screen_width // 2, self.screen_height // 2)
         self.max_distance = None
-        self.current_delay = 0.3  # Базовая задержка
+        self.current_delay = 0.3  # Значение по умолчанию
 
     def calculate_areas(self):
-        """Разделение экрана на rows x cols равных частей с расчетом удаленности"""
+        """Разделение экрана с расчетом максимального расстояния"""
         part_width = self.screen_width / self.cols
         part_height = self.screen_height / self.rows
 
-        # Рассчитываем максимальное расстояние (до угловой зоны)
-        corner_x = self.screen_width
-        corner_y = 0
-        self.max_distance = ((corner_x - self.screen_center[0]) ** 2 +
-                             (corner_y - self.screen_center[1]) ** 2) ** 0.5
+        # Максимальное расстояние до угла экрана
+        corner_distances = [
+            ((0 - self.screen_center[0]) ** 2 + (0 - self.screen_center[1]) ** 2) ** 0.5,
+            ((self.screen_width - self.screen_center[0]) ** 2 + (0 - self.screen_center[1]) ** 2) ** 0.5,
+            ((0 - self.screen_center[0]) ** 2 + (self.screen_height - self.screen_center[1]) ** 2) ** 0.5,
+            ((self.screen_width - self.screen_center[0]) ** 2 + (
+                        self.screen_height - self.screen_center[1]) ** 2) ** 0.5
+        ]
+        self.max_distance = max(corner_distances)
 
         self.centers = {}
-        counter = 1
         for i in range(self.rows):
             for j in range(self.cols):
+                num = i * self.cols + j + 1
                 center_x = j * part_width + part_width / 2
                 center_y = i * part_height + part_height / 2
 
-                # Рассчитываем расстояние от центра экрана до центра зоны
                 distance = ((center_x - self.screen_center[0]) ** 2 +
                             (center_y - self.screen_center[1]) ** 2) ** 0.5
 
-                # Сохраняем центр и расстояние
-                self.centers[counter] = {
+                self.centers[num] = {
                     'center': (center_x, center_y),
-                    'distance': distance
+                    'distance': distance,
+                    'delay_factor': (distance / self.max_distance) * self.distance_coef
                 }
-                counter += 1
+
+    def move_to_random_area(self):
+        """Возвращает кортеж (координаты, задержка)"""
+        if not self.scan_areas:
+            return None, self.current_delay
+
+        area = random.choice(self.scan_areas)
+        zone_data = self.centers[area]
+        x, y = zone_data['center']
+        self.current_delay = zone_data['delay_factor']
+
+        pyautogui.moveTo(x, y, duration=0.2)
+        time.sleep(0.1)
+
+        return (x, y), self.current_delay
 
     def show_interactive_window(self):
         """Окно выбора зон с сохранением выбранных областей"""
@@ -140,24 +158,6 @@ class ScreenDivider:
         self.window_closed = True
         self.root.quit()
         self.root.destroy()
-
-    def move_to_random_area(self):
-        """Перемещение в случайную ВЫБРАННУЮ зону с расчетом задержки"""
-        if not self.scan_areas:
-            return None
-
-        area = random.choice(self.scan_areas)
-        zone_data = self.centers[area]
-        x, y = zone_data['center']
-
-        # Рассчитываем задержку на основе удаленности
-        distance_percent = zone_data['distance'] / self.max_distance
-        self.current_delay = 1.1 if distance_percent * 1.5 > 1.1 else distance_percent * 1.5  # Умножаем на коэффициент
-
-        pyautogui.moveTo(x, y, duration=0.2)
-        time.sleep(0.3)
-
-        return self.current_delay
 
     def setup(self):
         """Инициализация с сохранением выбранных зон"""

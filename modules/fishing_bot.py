@@ -191,7 +191,7 @@ class FishingBot:
 
 def main():
     # Создаем и запускаем бота
-    bot = FishingBot("img/float_small.jpg")
+    bot = FishingBot("../img/float_small.jpg")
     bot.run()
 
 

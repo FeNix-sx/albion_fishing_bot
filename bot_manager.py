@@ -17,7 +17,7 @@ class BotManager(QObject):
     def _initialize_bot(self):
         """Ленивая инициализация бота с правильными параметрами"""
         if self.bot is None:
-            from fishing_bot import FishingBot
+            from modules.fishing_bot import FishingBot
             self.bot = FishingBot(template_path=self.template_path)
 
     def start(self):

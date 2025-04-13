@@ -178,7 +178,7 @@ class ItemRecognizer:
 
     def _update_items_db_file(self):
         """Обновляет файл items_db.py с новыми предметами"""
-        with open('items_db.py', 'w', encoding='utf-8') as f:
+        with open('../items_db.py', 'w', encoding='utf-8') as f:
             f.write('# -*- coding: utf-8 -*-\n')
             f.write('"""\nБаза известных предметов для распознавания.\n"""\n\n')
             f.write('ITEMS_DB = {\n')
@@ -203,7 +203,7 @@ class ItemRecognizer:
 # Пример использования
 if __name__ == "__main__":
     recognizer = ItemRecognizer()
-    image_path = "screenshot_2025-04-05_10-01-16.png"  # Укажите путь к вашему скриншоту
+    image_path = "../screenshot_2025-04-05_10-01-16.png"  # Укажите путь к вашему скриншоту
 
     matched_name, count, clean_name = recognizer.process_image(image_path)
 

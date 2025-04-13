@@ -10,7 +10,7 @@ import time
 import pyautogui
 
 class AutoMouseClick:
-    def __init__(self, delta_time=0.1):
+    def __init__(self, delta_time=0.05):
         """
         :param delta_time: Разброс вокруг базовой задержки (в секундах)
         """
@@ -22,7 +22,7 @@ class AutoMouseClick:
         """
         # Генерация конечной задержки
         hold_time = random.uniform(
-            max(0.1, base_delay - self.delta_time),  # Минимум 0.1 сек
+            max(0.2, base_delay - self.delta_time),  # Минимум 0.2 сек
             base_delay + self.delta_time
         )
 

@@ -9,14 +9,14 @@
 Запускает интерфейс для задания цели по количеству рыб.
 """
 import time
-from collections import defaultdict
-from audio_detector_single import AudioDetectorEnhanced
-from fishing_bot import FishingBot
-from auto_mouse_click import AutoMouseClick
-from screen_divider import ScreenDivider
-from item_recognizer import ItemRecognizer
 import pyautogui
 import os
+from collections import defaultdict
+from modules.audio_detector_single import AudioDetectorEnhanced
+from modules.fishing_bot import FishingBot
+from modules.auto_mouse_click import AutoMouseClick
+from modules.screen_divider import ScreenDivider
+from modules.item_recognizer import ItemRecognizer
 
 
 class FishingManager:

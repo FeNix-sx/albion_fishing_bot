@@ -1,6 +1,5 @@
 import threading
-import time
-from fishing_bot import FishingBot  # Импорт вашего оригинального класса
+from modules.fishing_bot import FishingBot  # Импорт вашего оригинального класса
 
 
 class FishingBotController:
