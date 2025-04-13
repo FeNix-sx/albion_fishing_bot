@@ -1,5 +1,5 @@
 import pyautogui
-from template_finder import TemplateFinder
+from modules.template_finder import TemplateFinder
 
 
 def main():

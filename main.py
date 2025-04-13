@@ -12,7 +12,7 @@ from modules.fishing_bot import FishingBot
 from modules.auto_mouse_click import AutoMouseClick
 from modules.screen_divider import ScreenDivider
 from modules.item_recognizer import ItemRecognizer
-from template_finder import BaitApplier
+from modules.template_finder import BaitApplier
 
 
 class FishingManager:
