@@ -3,7 +3,7 @@ import os
 EXPECTED_STRUCTURE = {
     'img': ['float_small.jpg', 'fishing.png', 'bite.png'],
     'modules': [
-        'audio_detector_single.py',
+        'audio_detector.py',
         'auto_mouse_click.py',
         'fishing_bot.py',
         'item_recognizer.py',

@@ -1,5 +1,5 @@
 import time
-from modules.audio_detector_single import AudioDetectorEnhanced
+from modules.audio_detector import AudioDetectorEnhanced
 from modules.fishing_bot import FishingBot
 from modules.auto_mouse_click import AutoMouseClick
 from modules.screen_divider import ScreenDivider
