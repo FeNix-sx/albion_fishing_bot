@@ -161,43 +161,82 @@ class TemplateFinder:
         return None
 
 
-def main():
-    """Демонстрация использования TemplateFinder"""
+# template_finder.py
+class BaitApplier:
+    """Класс для применения наживки в Albion Online"""
 
-    print("=== Демонстрация работы TemplateFinder ===")
+    def __init__(self, threshold: float = 0.8):
+        self.finder = TemplateFinder(threshold=threshold)
 
-    try:
-        # 1. Инициализация
-        finder = TemplateFinder(
-            threshold=0.8,
-            scales=[0.6, 0.8, 1.0, 1.2]
-        )
+    def apply_bait(self) -> bool:
+        """Полный процесс применения наживки"""
+        try:
+            # 1. Открываем окно инвентаря
+            pyautogui.press('i')
+            time.sleep(1)  # Даем время на открытие окна
 
-        # 2. Первый поиск (стартовая кнопка)
-        print("\nПоиск стартовой кнопки...")
-        finder.templates = [
-            'templates/start.png',
-            'templates/start_alt.png'
-        ]
+            # 2. Поиск и клик по наживке
+            self.finder.templates = [
+                'img/bait.png',
+                'img/bait_low.png',
+                'img/bait_small.png',
+                'img/bait_small_low.png'
+            ]
+            if not self.finder.find_and_move(delay=0.5):
+                print("Не удалось найти наживку в инвентаре")
+                return False
 
-        if finder.find_and_move(delay=1):
             pyautogui.click()
             time.sleep(0.5)
 
-            # 3. Второй поиск (кнопка продолжения)
-            print("\nПоиск кнопки продолжения...")
-            finder.templates = [
-                'templates/continue.png',
-                'templates/next.png'
+            # 3. Подтверждение использования
+            self.finder.templates = [
+                'img/use_bait.png',
+                'img/use_bait_small.png'
             ]
+            if not self.finder.find_and_move(delay=0.5):
+                print("Не удалось найти окно подтверждения")
+                return False
 
-            if finder.find_and_move(delay=0.5):
-                pyautogui.doubleClick()
+            # 4. Клик по кнопке использования
+            self.finder.templates = [
+                'img/use_the_bait.png',
+                'img/use_the_bait_small.png'
+            ]
+            if not self.finder.find_and_move(delay=0.5):
+                print("Не удалось найти кнопку применения")
+                return False
 
-    except Exception as e:
-        print(f"\nОшибка: {str(e)}")
+            pyautogui.click()
+            time.sleep(0.5)
 
-    input("\nНажмите Enter для выхода...")
+            # 5. Закрываем окно
+            pyautogui.press('esc')
+            time.sleep(0.5)
+
+            print("🪱 Наживка успешно применена!")
+            return True
+
+        except Exception as e:
+            print(f"Ошибка при применении наживки: {str(e)}")
+            return False
+
+
+def main():
+    """Демонстрация работы TemplateFinder и BaitApplier"""
+    print("=== Демонстрация работы ===")
+
+    # Демонстрация TemplateFinder
+    finder = TemplateFinder(threshold=0.8)
+    finder.templates = ['img/bait.png']
+    result = finder.find_and_move()
+
+    # Демонстрация BaitApplier
+    bait_applier = BaitApplier()
+    if bait_applier.apply_bait():
+        print("Наживка успешно применена!")
+    else:
+        print("Не удалось применить наживку")
 
 
 if __name__ == "__main__":
