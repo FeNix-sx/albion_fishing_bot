@@ -76,7 +76,7 @@ class TemplateFinder:
 
         return None
 
-    def find_and_move(self, delay: float = 0) -> Optional[Dict]:
+    def find_and_move(self, delay: float = 0, duration:float = 0.5) -> Optional[Dict]:
         """
         Поиск шаблона и плавное перемещение курсора
 
@@ -99,27 +99,8 @@ class TemplateFinder:
 
         if result:
             (target_x, target_y), match_info = result
-            current_x, current_y = pyautogui.position()
-
-            # Рассчитываем расстояние и время перемещения
-            distance = math.sqrt((target_x - current_x) ** 2 + (target_y - current_y) ** 2)
-            duration = min(max(0.15, distance / 1500), 0.01)  # Быстро, но не мгновенно
-
-            # Параметры для плавности
-            steps = max(int(distance / 10), 5)
-            sleep_time = duration / steps
-
-            for step in range(1, steps + 1):
-                # Квадратичная интерполяция для плавности
-                t = step / steps
-                progress = t * t  # Ускорение в начале
-
-                x = int(current_x + (target_x - current_x) * progress)
-                y = int(current_y + (target_y - current_y) * progress)
-                pyautogui.moveTo(x, y)
-                print(sleep_time, duration, steps)
-                time.sleep(sleep_time)
-
+            pyautogui.moveTo(target_x, target_y, duration=duration)
+            
             return match_info
 
         return None

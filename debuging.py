@@ -22,14 +22,14 @@ def main():
         'templates/use_bait.png',
         'templates/use_bait_small.png'
     ]
-    result2 = finder.find_and_move(delay=0.1)
+    result2 = finder.find_and_move()
 
     # Трерий поиск (другие шаблоны)
     finder.templates = [
         'templates/use_the_bait.png',
         'templates/use_the_bait_small.png'
     ]
-    result3 = finder.find_and_move(delay=0.5)
+    result3 = finder.find_and_move()
 
 if __name__ == '__main__':
     main()
